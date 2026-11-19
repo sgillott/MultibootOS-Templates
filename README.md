@@ -1,18 +1,20 @@
 # MultibootOS official templates
 
-The distribution templates the MultibootOS Image Builder shows as **Official**. A template here becomes official only by being
-merged into `main` through a reviewed pull request. The signing workflow then signs every template and publishes them as a
-release, and the builder checks each signature against the public key built into it.
+The distribution templates the MultibootOS Image Builder shows as **Official**: one file per distribution, `templates/<Name>.json`,
+holding all its versions. A template here becomes official only by being merged into `main` through a reviewed pull request. The
+signing workflow then signs every file and publishes them as a release, and the builder checks each signature against the public
+key built into it.
 
 ## How it works
 
-- `templates/<id>/` holds one template: its `template.json` and any files it brings (for example `overlay/`).
-- `template.sig` is written only by the signing workflow. It holds the key's id and an ECDSA P-256 signature of the folder: the
-  SHA-256 of every file, sorted by path. Changing, adding, removing or renaming any file breaks it, and a `.sig` copied into
-  another folder does not fit it.
+- `templates/<Name>.json` is one distribution, for example `CaffeineOS.json`, with a `"versions"` list, newest first. Nothing
+  else goes in `templates/`.
+- The signature is the last line of the file, written only by the signing workflow: `// signature: <key id> <base64>`, an
+  ECDSA P-256 signature of every byte above it (line ends read as LF). Changing anything in the file breaks it, and a line
+  copied from another file does not fit. Files here carry no signature; the signed copies are in the releases.
 - The private key is a secret of the GitHub environment `template-signing`. Nobody keeps it on a computer. The workflow writes it
   to a temporary file, signs, and deletes the file.
-- The builder holds only the public half. Anyone can read the public half and every `template.sig`; neither lets anyone sign.
+- The builder holds only the public half. Anyone can read the public half and every signature line; neither lets anyone sign.
 - `tools/sign-template.cs` is the only signing code. It never ships with the builder.
 
 ## Joining or leaving the team
@@ -47,7 +49,7 @@ environment. Leaving means losing both. No key changes hands.
 1. Open a pull request with the change. The check workflow runs without any secret.
 2. A team member reviews and merges it.
 3. The signing workflow waits for a required reviewer to approve the `template-signing` environment, signs every template, and
-   publishes a release `templates-<date>-<run>` with `templates.zip`.
+   publishes a release `templates-<date>-<run>` with `templates.zip`, the signed `<Name>.json` files.
 
 ## Replacing the key
 
