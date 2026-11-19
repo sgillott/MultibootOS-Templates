@@ -22,6 +22,7 @@
     {
       "id": "amigaos-3.2",
       "version": "3.2",
+      "wifi": "ADH1:Prefs/Env-Archive/Sys/wireless.prefs",
       "install": "media.json",
       "sources": [
         {

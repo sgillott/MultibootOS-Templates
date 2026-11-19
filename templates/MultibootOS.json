@@ -11,6 +11,7 @@
     {
       "id": "core",
       "version": "2.3",
+      "wifi": "ADH0:Prefs/Env-Archive/Sys/wireless.prefs",
       "partitions": [
         {"device": "FAT32", "volume": "EMU68", "dosType": "FAT32", "size": 1.18, "fixed": true},
         {"device": "ADH0", "volume": "ABS", "dosType": "PDS3", "size": 0.11, "fixed": true, "bootable": true, "bootPriority": 2}
