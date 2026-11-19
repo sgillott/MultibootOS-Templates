@@ -1,0 +1,62 @@
+{
+  // Amiga Game Selector 3.0a, taken from a MultibootOS 2.2 image (or a card saved to an image). There was no official PiStorm
+  // AGS 3.0a, and 2.2 carries fixes the author's downloads lack. AGS0..AGS10 are partitions 3..13 of the RDB in MBR entry 3
+  // (16/212). minBytes is each partition's size there; shrinkMinBytes is 2.2's used space x 1.10, whole cylinders, capped at minBytes.
+  "id": "ags-3.0a",
+  "label": "AGS3.0 by P.Vince",
+  "script": "AGS",
+  "flag": "ags",
+  "bootDevice": "AGS0",
+  "geometry": { "heads": 16, "sectors": 212 },
+  "partitions": [
+    { "device": "AGS0", "volume": "Workbench", "dosType": "PDS3", "minBytes": 1019445248, "shrinkMinBytes": 545325056, "bootable": true, "import": { "mbr": 3, "partition": 3 } },
+    { "device": "AGS1", "volume": "AGS_Drive", "dosType": "PDS3", "minBytes": 4176773120, "shrinkMinBytes": 3839852544, "import": { "mbr": 3, "partition": 4 } },
+    { "device": "AGS2", "volume": "Work", "dosType": "PDS3", "minBytes": 2148302848, "shrinkMinBytes": 1241743360, "import": { "mbr": 3, "partition": 5 } },
+    { "device": "AGS3", "volume": "Games", "dosType": "PDS3", "minBytes": 8077410304, "shrinkMinBytes": 6910345216, "import": { "mbr": 3, "partition": 6 } },
+    { "device": "AGS4", "volume": "Media", "dosType": "PDS3", "minBytes": 3789488128, "shrinkMinBytes": 3131277312, "import": { "mbr": 3, "partition": 7 } },
+    { "device": "AGS5", "volume": "WHD_Games", "dosType": "PDS3", "minBytes": 8162508800, "shrinkMinBytes": 8162508800, "import": { "mbr": 3, "partition": 8 } },
+    { "device": "AGS6", "volume": "WHD_Demos", "dosType": "PDS3", "minBytes": 2631106560, "shrinkMinBytes": 1596030976, "import": { "mbr": 3, "partition": 9 } },
+    { "device": "AGS7", "volume": "Emulators1", "dosType": "PDS3", "minBytes": 3777331200, "shrinkMinBytes": 3013181440, "import": { "mbr": 3, "partition": 10 } },
+    { "device": "AGS8", "volume": "Emulators2", "dosType": "PDS3", "minBytes": 6255607808, "shrinkMinBytes": 5729386496, "import": { "mbr": 3, "partition": 11 } },
+    { "device": "AGS9", "volume": "Music", "dosType": "PDS3", "minBytes": 3763437568, "shrinkMinBytes": 3763437568, "import": { "mbr": 3, "partition": 12 } },
+    { "device": "AGS10", "volume": "Premium", "dosType": "PDS3", "minBytes": 8231976960, "shrinkMinBytes": 8231976960, "import": { "mbr": 3, "partition": 13 } }
+  ],
+
+  // Read by the Image Builder application only (MultibootOS.Core ignores "gui").
+  // Sizes come from the AGS partitions measured in docs/partition-sizes.json (UAE_* sources; minimums as measured, never above the distributed size).
+  "gui": {
+    "family": "ags",
+    "name": "Amiga Game Selector",
+    "shortName": "AGS",
+    "description": "Front-end for hard-drive games, with WHDLoad titles ready to play.",
+    "intro": "Amiga Game Selector is a game launcher with its own hard drives for the front-end, games and WHDLoad titles.",
+    "color": "#7B3FA0", "darkColor": "#A56BD0",
+    "version": "3.0a", "revision": 1, "order": 30,
+    "author": "Paul Vince",
+    "licence": "Free. Licence terms to be confirmed with the author.",
+    "licenceRequirement": "free",
+    "infoUrl": "https://www.amigagameselector.co.uk/amiga-game-selector-downloads/",
+    "downloadUrl": "https://multibootos.com/download/",
+    "obtained": "userSupplied",
+    "defaultSelected": true,
+    "messages": [
+      { "kind": "info", "text": "There was never an official PiStorm version of Amiga Game Selector 3.0a, so MultibootOS 2.2 carries its own, with fixes the original downloads do not have. Choose your MultibootOS 2.2 image below, or put your 2.2 SD card in the card reader and choose Read from SD card." }
+    ],
+    "sources": [ { "label": "MultibootOS 2.2 image or SD card", "watermark": "Path to the MultibootOS 2.2 image file", "recognisedAs": "Amiga Game Selector 3.0a (MultibootOS 2.2)", "kind": "file" } ],
+    "upcoming": [ "3.1 (not yet available, will need a 256 GB card)" ],
+    "addPartitionAllowed": false,
+    "partitions": [
+      { "device": "AGS0", "volume": "Workbench", "distributedBytes": 1019445248, "shrinkMinBytes": 545325056, "shrinkOrder": 9, "dosType": "PDS\\3", "bootable": true, "files": 8216 },
+      { "device": "AGS1", "volume": "AGS_Drive", "distributedBytes": 4176773120, "shrinkMinBytes": 3839852544, "shrinkOrder": 5, "dosType": "PDS\\3", "files": 140602 },
+      { "device": "AGS2", "volume": "Work", "distributedBytes": 2148302848, "shrinkMinBytes": 1241743360, "shrinkOrder": 1, "dosType": "PDS\\3", "files": 37843 },
+      { "device": "AGS3", "volume": "Games", "distributedBytes": 8077410304, "shrinkMinBytes": 6910345216, "shrinkOrder": 2, "dosType": "PDS\\3", "files": 88211 },
+      { "device": "AGS4", "volume": "Media", "distributedBytes": 3789488128, "shrinkMinBytes": 3131277312, "shrinkOrder": 3, "dosType": "PDS\\3", "files": 4219 },
+      { "device": "AGS5", "volume": "WHD_Games", "distributedBytes": 8162508800, "shrinkMinBytes": 8162508800, "shrinkOrder": 8, "dosType": "PDS\\3", "files": 320631 },
+      { "device": "AGS6", "volume": "WHD_Demos", "distributedBytes": 2631106560, "shrinkMinBytes": 1596030976, "shrinkOrder": 1, "dosType": "PDS\\3", "files": 24624 },
+      { "device": "AGS7", "volume": "Emulators1", "distributedBytes": 3777331200, "shrinkMinBytes": 3013181440, "shrinkOrder": 4, "dosType": "PDS\\3", "files": 8028 },
+      { "device": "AGS8", "volume": "Emulators2", "distributedBytes": 6255607808, "shrinkMinBytes": 5729386496, "shrinkOrder": 2, "dosType": "PDS\\3", "files": 4391 },
+      { "device": "AGS9", "volume": "Music", "distributedBytes": 3763437568, "shrinkMinBytes": 3763437568, "shrinkOrder": 6, "dosType": "PDS\\3", "files": 96182 },
+      { "device": "AGS10", "volume": "Premium", "distributedBytes": 8231976960, "shrinkMinBytes": 8231976960, "shrinkOrder": 10, "dosType": "PDS\\3", "files": 12739 }
+    ]
+  }
+}

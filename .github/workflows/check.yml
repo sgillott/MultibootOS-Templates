@@ -1,0 +1,27 @@
+# Checks a proposed change without any secret: every template has a template.json, none brings its own
+# template.sig (only the signing workflow writes those), and the signing tool runs on all of them.
+name: Check templates
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Check
+        run: |
+          set -euo pipefail
+          for d in templates/*/; do
+            test -f "$d/template.json" || { echo "$d has no template.json"; exit 1; }
+            test ! -f "$d/template.sig" || { echo "$d brings a template.sig; only the signing workflow writes those"; exit 1; }
+          done
+          dotnet run tools/sign-template.cs -- keygen "$RUNNER_TEMP/throwaway.pem" > /dev/null
+          dotnet run tools/sign-template.cs -- sign "$RUNNER_TEMP/throwaway.pem" check templates/*/

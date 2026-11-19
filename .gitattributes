@@ -1,0 +1,2 @@
+# Store every file exactly as committed: Amiga scripts need LF, and the signature covers the bytes.
+* -text

@@ -1,0 +1,48 @@
+# Signs every official template when a reviewed change reaches main, and publishes the signed folders as a release.
+# The private key is the secret TEMPLATE_SIGNING_KEY of the environment "template-signing", which only main may use
+# and which waits for a team member's approval before this job sees the key (README.md, "Setting up").
+name: Sign templates
+
+on:
+  push:
+    branches: [main]
+    paths: ['templates/**', 'tools/sign-template.cs']
+  workflow_dispatch:
+
+permissions:
+  contents: write # to publish the release
+
+concurrency: sign-templates
+
+jobs:
+  sign:
+    runs-on: ubuntu-latest
+    environment: template-signing
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Sign every template
+        env:
+          TEMPLATE_SIGNING_KEY: ${{ secrets.TEMPLATE_SIGNING_KEY }}
+          TEMPLATE_KEY_ID: ${{ vars.TEMPLATE_KEY_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$TEMPLATE_SIGNING_KEY" || { echo "The environment has no TEMPLATE_SIGNING_KEY secret."; exit 1; }
+          test -n "$TEMPLATE_KEY_ID" || { echo "The environment has no TEMPLATE_KEY_ID variable."; exit 1; }
+          key="$RUNNER_TEMP/key.pem"
+          trap 'rm -f "$key"' EXIT
+          umask 077
+          printf '%s\n' "$TEMPLATE_SIGNING_KEY" > "$key"
+          dotnet run tools/sign-template.cs -- sign "$key" "$TEMPLATE_KEY_ID" templates/*/
+
+      - name: Publish the signed templates
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="templates-$(date -u +%Y%m%d)-${{ github.run_number }}"
+          (cd templates && zip -r -X "$RUNNER_TEMP/templates.zip" .)
+          gh release create "$tag" "$RUNNER_TEMP/templates.zip" --title "$tag" --notes "Official templates signed from ${{ github.sha }}."

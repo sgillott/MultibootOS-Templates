@@ -1,0 +1,272 @@
+;----------------------------------------------------------
+; MultibootOS 2.3 ABS Startup-Sequence with AMS
+; $VER: Startup-Sequence 1.9.1 (17.11.2026)
+;----------------------------------------------------------
+
+Stack 8192 ; Prevents GURU on scripts after ABS is launched
+setpatch quiet
+
+; Workaround for non-KS3.2 ENV: not mounted issue with Checkconfigtxt
+env-handler
+
+;@IF AGS0@
+Alias dopus AGS0:Utilities/DirOpus4/DirectoryOpus >NIL:
+;@ENDIF@
+
+IF NOT Exists RAM:T
+	MakeDir RAM:T
+	Assign T: RAM:T
+EndIF
+
+Resident ADH0:C/Assign PURE
+
+Assign >NIL: S: SYS:S
+Assign >NIL: DEVS: SYS:Devs
+Assign >NIL: LIBS: SYS:Libs
+Assign >NIL: LIBS: SYS:Classes ADD
+Assign >NIL: Classes: SYS:Classes
+Assign >NIL: FONTS: SYS:Fonts
+
+
+IF EXISTS C:AddDataTypes
+	C:AddDataTypes REFRESH
+ENDIF
+
+
+Copy ADH0:C/DiskChange RAM:
+Copy ADH0:C/Emu68info RAM:
+Copy ADH0:C/Bootcontrol RAM:
+
+;**********************************************************
+; Establish MultibootOS display mode
+;
+; This happens BEFORE any automatic boot selection.
+;
+; RTG=1
+;   MultibootOS
+;   AmigaDOS
+;   AMS
+;   CLI
+;   all run using RTG
+;
+; RTG=0
+;   everything uses native HiRes Laced
+;**********************************************************
+
+Execute S:SetDisplayMode
+
+; FirstRun message
+IF Exists ADH0:Checks/FirstRun
+
+    Execute ADH0:S/FirstRun.txt
+    Delete ADH0:Checks/FirstRun >NIL:
+
+;@IF SDH0@
+    SDH0:C/Avail FLUSH >NIL:
+;@ENDIF@
+
+EndIF
+
+Execute s:CheckBootcontrolinstartups ;Checking various startup-sequences
+
+;----------------------------------------------------------
+; Detect UAE
+;----------------------------------------------------------
+
+IF EXISTS C:DetectUAE
+    C:DetectUAE
+
+	IF Warn
+		SKIP AutoUpdateUAE
+	ENDIF
+	
+ENDIF
+
+FailAt 21
+
+
+;----------------------------------------------------------
+; Pi4 / CM4 device patch
+;----------------------------------------------------------
+
+Version brcm-emmc.device >NIL:
+
+IF NOT FAIL
+
+    Run <>NIL: OpenDevicePatch FROM brcm-sdhc.device TO brcm-emmc.device
+
+EndIF
+
+
+FailAt 10
+
+
+;----------------------------------------------------------
+; Detect PiStorm variant
+;----------------------------------------------------------
+
+Set PistormVariant `Emu68Info VARIANT`
+
+IF $PistormVariant EQ "Pistorm16"
+
+    ; PiStorm16 uses the new Alpha Kernel
+
+    CopyReplace ADH0:Storage/Drivers/Pistorm/Videocore/FrameThrower/Videocore.card ADH0:Libs/Picasso96/ QUIET
+;@IF SDH0@
+    CopyReplace ADH0:Storage/Drivers/Pistorm/Videocore/FrameThrower/Videocore.card SDH0:Libs/Picasso96/ QUIET
+;@ENDIF@
+;@IF ADH1@
+    CopyReplace ADH0:Storage/Drivers/Pistorm/Videocore/FrameThrower/Videocore.card ADH1:Libs/Picasso96/ QUIET
+;@ENDIF@
+;@IF AGS0@
+    CopyReplace ADH0:Storage/Drivers/Pistorm/Videocore/FrameThrower/Videocore.card AGS0:Libs/Picasso96/ QUIET
+;@ENDIF@
+;@IF AGS0@
+    CopyReplace ADH0:Storage/Drivers/Pistorm/Videocore/FrameThrower/Videocore.card AGS0:Libs/Picasso96/Emu68-VC4.card QUIET
+;@ENDIF@
+
+    ; AmiKit may have been removed
+;@IF AK0@
+    CopyReplace ADH0:Storage/Drivers/Pistorm/Videocore/FrameThrower/Videocore.card AK0:Libs/Picasso96/ QUIET
+;@ENDIF@
+
+EndIF
+
+
+;----------------------------------------------------------
+; AutoUpdate from USERFAT
+; Running on Emu68
+;----------------------------------------------------------
+
+ADH0:C/Assign >NIL: USERFAT: Exists
+
+IF Warn
+
+    Mount ADH0:UserFat
+    Wait 1
+
+    Search >NIL: UserFat:User/ "MultibootUpdateV#?" FILE NONUM
+
+    IF NOT Warn
+
+        Echo "1" >ENVARC:Updatefound
+        Skip Updatefound
+
+    EndIF
+
+    FailAt 10
+
+EndIF
+
+;----------------------------------------------------------
+; Check CONFIG.TXT
+;----------------------------------------------------------
+
+Execute S:Checkconfigtxt
+
+LAB BEGIN
+
+IF Exists SYS:Kick
+    Delete >NIL: SYS:Kick
+EndIF
+
+
+;----------------------------------------------------------
+; Automatic Boot after reset
+;----------------------------------------------------------
+
+;@HOOK autoboot@
+
+Skip ABS
+
+
+;----------------------------------------------------------
+; END Automatic Boot after reset
+;----------------------------------------------------------
+
+
+;**********************************************************
+; UAE AutoUpdate
+;**********************************************************
+
+LAB AutoUpdateUAE
+
+
+Assign >NIL: "EMU68:" EXISTS
+
+IF NOT Warn
+
+    Assign >NIL: "USERFAT:" "EMU68:"
+
+    Execute S:Checkconfigtxt
+
+    ; Fix for CaffeineOS check on update of CONFIG.TXT
+    Copy >NIL: EMU68:config_caffeine.txt EMU68:CONFIG.TXT
+
+    Search >NIL: UserFat:User/ "MultibootUpdateV#?" FILE NONUM
+
+    IF NOT Warn
+
+        Echo "1" >ENVARC:Updatefound
+        Skip Updatefound
+
+    EndIF
+
+    FailAt 10
+
+EndIF
+
+
+;----------------------------------------------------------
+; UAE arrives here before the normal display-mode call above
+; so apply the selected MultibootOS mode now.
+;----------------------------------------------------------
+
+; Register the correct P96 monitor before AMS asks for the mode in AMS.conf.
+IF EXISTS C:DetectUAE
+	C:DetectUAE
+	IF WARN
+		IF EXISTS DEVS:Monitors/UAEgfx
+			DEVS:Monitors/UAEgfx
+		ENDIF
+	ELSE
+		IF EXISTS C:LoadMonDrvs
+			C:LoadMonDrvs EXCEPT=UAEgfx
+		ENDIF
+	ENDIF
+ENDIF
+
+Execute S:SetDisplayMode
+
+;**********************************************************
+; AMS
+;**********************************************************
+
+LAB ABS
+
+IF VAL $RTG EQ 1
+
+	; Start AMS with RTG config (default)
+	AMS
+
+ELSE
+
+	; Start AMS with RGB config
+	AMS -config S:AmigaBootSelector/AMS-HiRes.conf
+
+EndIF
+
+Execute S:AmigaBootSelector/Boot.ABS
+
+Quit
+
+
+
+;**********************************************************
+; Update found
+;**********************************************************
+
+LAB Updatefound
+
+; The CLI entry's script, by its name in Scripts.cfg
+Run Execute ABS:S/AmigaBootSelector/CLI
