@@ -1,5 +1,5 @@
-# Checks a proposed change without any secret: every template has a template.json, none brings its own
-# template.sig (only the signing workflow writes those), and the signing tool runs on all of them.
+# Checks a proposed change without any secret: templates/ holds only <Name>.json files, one per distribution, none
+# brings its own signature line (only the signing workflow writes those), and the signing tool runs on all of them.
 name: Check templates
 
 on:
@@ -19,9 +19,7 @@ jobs:
       - name: Check
         run: |
           set -euo pipefail
-          for d in templates/*/; do
-            test -f "$d/template.json" || { echo "$d has no template.json"; exit 1; }
-            test ! -f "$d/template.sig" || { echo "$d brings a template.sig; only the signing workflow writes those"; exit 1; }
-          done
+          if find templates -mindepth 1 ! -name '*.json' | grep .; then echo "templates/ holds only <Name>.json files"; exit 1; fi
+          if grep -l '^// signature:' templates/*.json; then echo "only the signing workflow writes signature lines"; exit 1; fi
           dotnet run tools/sign-template.cs -- keygen "$RUNNER_TEMP/throwaway.pem" > /dev/null
-          dotnet run tools/sign-template.cs -- sign "$RUNNER_TEMP/throwaway.pem" check templates/*/
+          dotnet run tools/sign-template.cs -- sign "$RUNNER_TEMP/throwaway.pem" check templates/*.json
