@@ -22,9 +22,9 @@ environment. Leaving means losing both. No key changes hands.
 
 ## Setting up (once, by an owner of the repository)
 
-1. **Branch protection on `main`.** Require a pull request with at least one approving review, require review from code
-   owners if you use them, and include administrators. This also protects `.github/workflows`, which could otherwise be changed
-   to send the key elsewhere.
+1. **Branch protection on `main`.** Require a pull request that passes the `check` workflow, and include administrators. This
+   also protects `.github/workflows`, which could otherwise be changed to send the key elsewhere. With one person on the team the
+   required approvals are 0, because GitHub never lets you approve your own pull request; raise it to 1 when a second person joins.
 2. **Environment `template-signing`** (Settings, Environments):
    - deployment branches: `main` only;
    - required reviewers: the team;
@@ -39,8 +39,8 @@ environment. Leaving means losing both. No key changes hands.
    It prints the public half. Paste the contents of `team-2026.pem` into the secret `TEMPLATE_SIGNING_KEY`, then delete the file
    for good (empty the recycle bin). Send the printed public half and the key id to whoever builds the Image Builder: it goes
    into `TemplateSignature.Trusted` as an Official key.
-4. **Actions permissions.** Allow GitHub Actions, and let workflows create releases (Settings, Actions, General, Workflow
-   permissions: read and write).
+4. **Actions permissions.** Leave the default workflow permissions at read-only (Settings, Actions, General). The signing
+   workflow asks for the one write permission it needs, to publish its release; the check workflow can only read.
 
 ## Changing a template
 
