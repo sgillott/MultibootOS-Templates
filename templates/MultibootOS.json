@@ -12,6 +12,8 @@
       "id": "core",
       "version": "2.3",
       "wifi": "ADH0:Prefs/Env-Archive/Sys/wireless.prefs",
+      // The menu boots a 3.x ROM for RTG (Picasso96): the 3.1 A1200 ROM, or the 3.2 one when AmigaOS 3.2 is on the card.
+      "roms": [{"any": ["kick31-a1200", "kick32-a1200"]}],
       "partitions": [
         {"device": "FAT32", "volume": "EMU68", "dosType": "FAT32", "size": 1.18, "fixed": true},
         {"device": "ADH0", "volume": "ABS", "dosType": "PDS3", "size": 0.11, "fixed": true, "bootable": true, "bootPriority": 2}
