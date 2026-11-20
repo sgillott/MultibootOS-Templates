@@ -22,6 +22,15 @@
     {
       "id": "ags-3.0a",
       "version": "3.0a",
+      // AGS boots the 3.1 A1200 ROM. The others are WHDLoad's: a game whose ROM is missing does not start.
+      "roms": [
+        {"any": ["kick31-a1200"]},
+        {"any": ["kick13-a500"], "optional": true},
+        {"any": ["kick33180-a500"], "optional": true},
+        {"any": ["kick37175-a500"], "optional": true},
+        {"any": ["kick39106-a1200"], "optional": true},
+        {"any": ["kick40068-a4000"], "optional": true}
+      ],
       "download": "https://multibootos.com/download/",
       "geometry": {"heads": 16, "sectors": 212},
       "sources": [
