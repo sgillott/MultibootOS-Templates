@@ -1,28 +1,21 @@
 {
-  // the MultibootOS core: the boot partition and the version that goes on the card: one entry per version, newest first (PLAN.md 22.5, R3).
+  // The MultibootOS core: the boot partition (ABS:) and the Online Updater, which always takes slot 12. "version" is the MultibootOS release the card carries.
+  // Sizes are in GB. A partition taken from the source ("from") gets its exact size from the image at build time.
+  // What is the same for every version is at the top; "versions" lists each release, newest first (PLAN.md 22.5, R3).
+  "name": "MultibootOS",
+  "description": "The MultibootOS boot partition and online updater.",
+  "bootMenu": {"label": "-> MultibootOS Online Update <-", "flag": "bootupdate"},
   "versions": [
+    // The MultibootOS boot partition (ABS:) and the Online Updater, which always takes slot 12.
+    // For the core, "version" is the MultibootOS release that the image carries; it has its own updater.
     {
-      // The MultibootOS boot partition (ABS:) and the Online Updater, which always takes slot 12.
       "id": "core",
-      "label": "-> MultibootOS Online Update <-",
-      "flag": "bootupdate",
+      "version": "2.3",
+      "wifi": "ADH0:Prefs/Env-Archive/Sys/wireless.prefs",
       "partitions": [
-        { "device": "ADH0", "volume": "ABS", "dosType": "PDS3", "minBytes": 105906176, "bootable": true, "bootPriority": 2 }
-      ],
-
-      // Read by the Image Builder application only (MultibootOS.Core ignores "gui").
-      // For the core, "version" is the MultibootOS release that the image carries; it has its own updater.
-      "gui": {
-        "family": "core",
-        "name": "MultibootOS",
-        "description": "The MultibootOS boot partition and online updater.",
-        "version": "2.3",
-        "revision": 1,
-        "partitions": [
-          { "device": "FAT32", "volume": "EMU68", "distributedBytes": 1177550848, "shrinkMinBytes": 1177550848, "dosType": "FAT32", "fixed": true },
-          { "device": "ADH0", "volume": "ABS", "distributedBytes": 105906176, "shrinkMinBytes": 105906176, "dosType": "PDS\\3", "bootable": true, "bootPriority": 2, "fixed": true }
-        ]
-      }
+        {"device": "FAT32", "volume": "EMU68", "dosType": "FAT32", "size": 1.18, "fixed": true},
+        {"device": "ADH0", "volume": "ABS", "dosType": "PDS3", "size": 0.11, "fixed": true, "bootable": true, "bootPriority": 2}
+      ]
     }
   ]
 }
