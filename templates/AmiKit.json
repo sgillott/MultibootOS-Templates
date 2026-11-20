@@ -18,6 +18,8 @@
     {
       "id": "amikit-12.2",
       "version": "12.2",
+      // AmiKit boots +KickstartROM/kick.rom: the 3.1 A1200 ROM, or the 3.2 one when AmigaOS 3.2 is on the card too.
+      "roms": [{"any": ["kick31-a1200", "kick32-a1200"]}],
       "geometry": {"heads": 6, "sectors": 256},
       "sources": [
         {"label": "AmiKit image", "hint": "Path to the image file", "recognisedAs": "AmiKit 12.2", "kind": "file"}
