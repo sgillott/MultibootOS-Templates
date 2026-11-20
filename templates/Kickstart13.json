@@ -1,0 +1,31 @@
+{
+  // Kickstart 1.3 (PLAN.md 25.1): no partition of its own. Its script, Kickstart13, comes with the activation files and runs
+  // ADH0:tudescript, which soft-kicks the 1.3 ROM from ADH0:Devs/Kickstarts/kick34005.A500 after config_kick13.txt booted the 3.1 ROM.
+  "name": "Kickstart 1.3",
+  "author": "Commodore",
+  "description": "Restarts the Amiga with the Kickstart 1.3 ROM, for old games and demos.",
+  "intro": "Kickstart 1.3 restarts your Amiga with the original A500 ROM, for software that needs it. It does not run under emulation.",
+  "licence": "Kickstart ROMs are Commodore's: use your own. MultibootOS never distributes them.",
+  "licenceRequirement": "free",
+  "order": 60,
+  "colours": {"light": "#B8860B", "dark": "#D9A521"},
+  "selectedByDefault": true,
+  "bootMenu": {"label": "Kickstart 1.3", "script": "Kickstart13", "flag": "kick13"},
+  "versions": [
+    {
+      "id": "kickstart-1.3",
+      "version": "1.3",
+      // The 3.1 ROM is what config_kick13.txt boots first; without one the core's own is used today, and AROS once R3 is done.
+      "roms": [
+        {"any": ["kick13-a500"]},
+        {"any": ["kick31-a1200"], "optional": true}
+      ],
+      "messages": [
+        {
+          "kind": "info",
+          "text": "You need your own Kickstart 1.3 (34.5) A500 ROM. Choose the file, or a folder of ROMs: the ROMs are recognised by their checksum and are asked for only once."
+        }
+      ]
+    }
+  ]
+}
