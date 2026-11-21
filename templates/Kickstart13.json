@@ -15,15 +15,15 @@
     {
       "id": "kickstart-1.3",
       "version": "1.3",
-      // The 3.1 ROM is what config_kick13.txt boots first; without one the core's own is used today, and AROS once R3 is done.
+      // config_kick13.txt boots the 3.1 ROM (kick31.rom) first, then TUDE soft-kicks the 1.3 ROM.
       "roms": [
         {"any": ["kick13-a500"]},
-        {"any": ["kick31-a1200"], "optional": true}
+        {"any": ["kick31-a1200"]}
       ],
       "messages": [
         {
           "kind": "info",
-          "text": "You need your own Kickstart 1.3 (34.5) A500 ROM. Choose the file, or a folder of ROMs: the ROMs are recognised by their checksum and are asked for only once."
+          "text": "You need your own Kickstart 1.3 (34.5) A500 ROM, and the Kickstart 3.1 A1200 ROM the Amiga starts from before switching to 1.3. Choose a ROM file, or a folder of ROMs: the ROMs are recognised by their checksum and are asked for only once."
         }
       ]
     }

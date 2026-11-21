@@ -20,6 +20,8 @@
     {
       "id": "caffeineos-9317",
       "version": "9317",
+      // CaffeineOS boots its own ROM (config_caffeine.txt: roms/caffeine_jingle.rom). The image carries it on its FAT partition; the core download does not.
+      "imageFiles": ["ROMS/caffeine_jingle.rom", "ROMS/caffeine_NOjingle.rom"],
       "wifi": "SDH0:Prefs/Env-Archive/Sys/Wireless.prefs",
       "download": "https://drive.google.com/file/d/1SGBvVp5UX8q5Jg3e57JD4nus4l__zK8s/view?usp=drive_link",
       "geometry": {"heads": 12, "sectors": 256},
