@@ -20,6 +20,13 @@ jobs:
         run: |
           set -euo pipefail
           if find templates -mindepth 1 ! -name '*.json' | grep .; then echo "templates/ holds only <Name>.json files"; exit 1; fi
-          if grep -l '^// signature:' templates/*.json; then echo "only the signing workflow writes signature lines"; exit 1; fi
+          if find community -mindepth 1 ! -name '*.json' ! -name README.md | grep .; then echo "community/ holds only <Name>.json files and README.md"; exit 1; fi
+          if grep -l '^// signature:' templates/*.json community/*.json; then echo "only the signing workflow writes signature lines"; exit 1; fi
+          # A community file may not take an official file's name, in any case, or the zips would overwrite each other in the builder.
+          for f in community/*.json; do
+            [ -e "$f" ] || continue
+            if ls templates | grep -ixF "$(basename "$f")"; then echo "$f has the name of an official template"; exit 1; fi
+          done
           dotnet run tools/sign-template.cs -- keygen "$RUNNER_TEMP/throwaway.pem" > /dev/null
           dotnet run tools/sign-template.cs -- sign "$RUNNER_TEMP/throwaway.pem" check templates/*.json
+          if ls community/*.json > /dev/null 2>&1; then dotnet run tools/sign-template.cs -- sign "$RUNNER_TEMP/throwaway.pem" check community/*.json; fi

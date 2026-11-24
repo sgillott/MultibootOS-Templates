@@ -6,7 +6,7 @@ name: Sign templates
 on:
   push:
     branches: [main]
-    paths: ['templates/**', 'tools/sign-template.cs']
+    paths: ['templates/**', 'community/**', 'tools/sign-template.cs']
   workflow_dispatch:
 
 permissions:
@@ -45,4 +45,42 @@ jobs:
           set -euo pipefail
           tag="templates-$(date -u +%Y%m%d)-${{ github.run_number }}"
           (cd templates && zip -X "$RUNNER_TEMP/templates.zip" *.json)
-          gh release create "$tag" "$RUNNER_TEMP/templates.zip" --title "$tag" --notes "Official templates signed from ${{ github.sha }}."
+          gh release create "$tag" "$RUNNER_TEMP/templates.zip" --latest --title "$tag" --notes "Official templates signed from ${{ github.sha }}."
+
+  # Community templates are signed with their own key, in their own environment, so approving an official signing run
+  # never hands the official key to a community file, and the other way round. Its release is never the "latest" one,
+  # because the builder's packaging takes the latest release as the official set.
+  sign-community:
+    runs-on: ubuntu-latest
+    environment: community-signing
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Sign every community template
+        env:
+          TEMPLATE_SIGNING_KEY: ${{ secrets.COMMUNITY_SIGNING_KEY }}
+          TEMPLATE_KEY_ID: ${{ vars.COMMUNITY_KEY_ID }}
+        run: |
+          set -euo pipefail
+          ls community/*.json > /dev/null 2>&1 || { echo "No community templates."; exit 0; }
+          test -n "$TEMPLATE_SIGNING_KEY" || { echo "The environment has no COMMUNITY_SIGNING_KEY secret."; exit 1; }
+          test -n "$TEMPLATE_KEY_ID" || { echo "The environment has no COMMUNITY_KEY_ID variable."; exit 1; }
+          key="$RUNNER_TEMP/key.pem"
+          trap 'rm -f "$key"' EXIT
+          umask 077
+          printf '%s
+' "$TEMPLATE_SIGNING_KEY" > "$key"
+          dotnet run tools/sign-template.cs -- sign "$key" "$TEMPLATE_KEY_ID" community/*.json
+
+      - name: Publish the signed community templates
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ls community/*.json > /dev/null 2>&1 || exit 0
+          tag="community-$(date -u +%Y%m%d)-${{ github.run_number }}"
+          (cd community && zip -X "$RUNNER_TEMP/community.zip" *.json)
+          gh release create "$tag" "$RUNNER_TEMP/community.zip" --latest=false --title "$tag" --notes "Community templates reviewed by the team, signed from ${{ github.sha }}."

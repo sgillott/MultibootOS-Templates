@@ -17,6 +17,18 @@ key built into it.
 - The builder holds only the public half. Anyone can read the public half and every signature line; neither lets anyone sign.
 - `tools/sign-template.cs` is the only signing code. It never ships with the builder.
 
+## Community templates
+
+`community/<Name>.json` holds templates users submit by pull request (see `community/README.md`). After review and merge, the
+`sign-community` job signs them with a separate **Community** key in its own environment, `community-signing`, and publishes
+`community-<date>-<run>` (`community.zip`), never marked as the latest release. The builder shows them as Community. Set up once,
+like the official key:
+
+1. Environment `community-signing`: deployment branches `main` only, required reviewers, variable `COMMUNITY_KEY_ID`
+   (for example `community-2026`), secret `COMMUNITY_SIGNING_KEY`.
+2. `dotnet run tools/sign-template.cs -- keygen community-2026.pem`, paste the private half into the secret, delete the file,
+   and send the printed public half to whoever builds the Image Builder (`TemplateSignature.Trusted`, as a Community key).
+
 ## Joining or leaving the team
 
 Joining means being given review rights on this repository and being made a required reviewer of the `template-signing`
